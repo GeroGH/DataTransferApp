@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using ExcelDataReader;
@@ -33,7 +34,7 @@ namespace DataTransferApp
 
                     var dataSet = reader.AsDataSet(conf);
                     var dataTableCollection = dataSet.Tables;
-                    var AssetClasses = dataTableCollection["Asset Classes"];
+                    var AssetClasses = dataTableCollection[0];
                     this.DataGridView.DataSource = AssetClasses;
                     this.DataGridView.RowHeadersVisible = false;
                     this.DataGridView.AllowUserToResizeRows = false;
@@ -43,6 +44,9 @@ namespace DataTransferApp
                     this.DataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
                     this.DataGridView.AllowUserToAddRows = false;
                     this.FileLocationLabel.Text = this.DataFileLocation;
+                    this.DataGridView.EnableHeadersVisualStyles = false;
+                    this.DataGridView.ColumnHeadersDefaultCellStyle.BackColor = Color.DeepSkyBlue;
+                    this.DataGridView.ColumnHeadersDefaultCellStyle.Font = new Font(this.DataGridView.ColumnHeadersDefaultCellStyle.Font, FontStyle.Bold); ;
                 }
             }
         }
