@@ -100,7 +100,7 @@
             this.Controls.Add(this.UpdateFields);
             this.Name = "DataTransferApp";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Data Transfer Application v 2024.03.04a";
+            this.Text = "Data Transfer Application v 2024.03.04 b";
             this.TopMost = true;
             this.Load += new System.EventHandler(this.DataTransferApp_Load);
             ((System.ComponentModel.ISupportInitialize)(this.DataGridView)).EndInit();
