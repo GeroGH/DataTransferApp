@@ -1,18 +1,19 @@
-﻿using System.Collections;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using ExcelDataReader;
 using Tekla.Structures.Model;
+using Tekla.Structures.Model.UI;
 using ModelObjectSelector = Tekla.Structures.Model.UI.ModelObjectSelector;
 
 namespace DataTransferApp
 {
-
     public partial class DataTransferApp : Form
     {
-        readonly string DataFileLocation = @"C:\Users\gergan.gospodinov\OneDrive - Bourne Group\TeklaStructuresModels_2023\3375-1 South Ruislip Head House\HS2 Asset Data.xlsx";
+        private string DataAssetFileName = string.Empty;
+        private string ModelFolder = string.Empty;
+        private string DataFileLocation = string.Empty;
         public DataTransferApp()
         {
             this.InitializeComponent();
@@ -20,6 +21,16 @@ namespace DataTransferApp
 
         private void DataTransferApp_Load(object sender, System.EventArgs e)
         {
+            var currentFormLocation = this.Location;
+            this.Location = new Point(currentFormLocation.X + 450, currentFormLocation.Y - 250);
+
+            var model = new Model();
+            this.ModelFolder = model.GetInfo().ModelPath;
+
+            this.DataAssetFileName = "HS2 Asset Data.xlsx";
+
+            this.DataFileLocation = Path.Combine(this.ModelFolder, this.DataAssetFileName);
+
             using (var stream = File.Open(this.DataFileLocation, FileMode.Open, FileAccess.Read))
             {
                 using (var reader = ExcelReaderFactory.CreateReader(stream))
@@ -45,7 +56,7 @@ namespace DataTransferApp
                     this.DataGridView.AllowUserToAddRows = false;
                     this.FileLocationLabel.Text = this.DataFileLocation;
                     this.DataGridView.EnableHeadersVisualStyles = false;
-                    this.DataGridView.ColumnHeadersDefaultCellStyle.BackColor = Color.DeepSkyBlue;
+                    this.DataGridView.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.LightGray;
                     this.DataGridView.ColumnHeadersDefaultCellStyle.Font = new Font(this.DataGridView.ColumnHeadersDefaultCellStyle.Font, FontStyle.Bold); ;
                 }
             }
@@ -55,7 +66,6 @@ namespace DataTransferApp
         {
             var mos = new ModelObjectSelector();
             var moe = mos.GetSelectedObjects();
-            var partsToSelelect = new ArrayList();
 
             while (moe.MoveNext())
             {
@@ -75,18 +85,15 @@ namespace DataTransferApp
                     part.SetUserProperty(columnName, value);
                 }
 
-                mos.Select(new ArrayList() { part }, false);
-                partsToSelelect.Add(part);
             }
 
-            mos.Select(partsToSelelect, false);
+            this.ChangeRepresentation("Color by EquipName");
         }
 
         private void DeleteFields_Click(object sender, System.EventArgs e)
         {
             var mos = new ModelObjectSelector();
             var moe = mos.GetSelectedObjects();
-            var partsToSelelect = new ArrayList();
 
             while (moe.MoveNext())
             {
@@ -104,14 +111,22 @@ namespace DataTransferApp
                     part.SetUserProperty(columnName, "");
                 }
 
-                mos.Select(new ArrayList() { part }, false);
-                partsToSelelect.Add(part);
             }
 
-            mos.Select(partsToSelelect, false);
+            this.ChangeRepresentation("Color by EquipName");
         }
 
-        private void OpenExcelFile_Click(object sender, System.EventArgs e)
+        private void ChangeRepresentation(string representation)
+        {
+            var VisibleViews = ViewHandler.GetVisibleViews();
+            while (VisibleViews.MoveNext())
+            {
+                var CurrentView = VisibleViews.Current;
+                CurrentView.CurrentRepresentation = representation;
+                CurrentView.Modify();
+            }
+        }
+        private void FileLocationLabel_Click(object sender, System.EventArgs e)
         {
             Process.Start(this.DataFileLocation);
         }
