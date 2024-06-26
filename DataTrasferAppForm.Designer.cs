@@ -93,13 +93,13 @@ namespace DataTransferApp
             this.Name = "DataTransferApp";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-
             this.Text = "Data Transfer Application v 2024.06.18 c";
             this.TopMost = true;
             this.Load += new System.EventHandler(this.DataTransferApp_Load);
             ((System.ComponentModel.ISupportInitialize)(this.DataGridView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
+
         }
 
         #endregion
