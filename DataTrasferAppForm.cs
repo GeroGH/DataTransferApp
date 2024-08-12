@@ -11,9 +11,11 @@ namespace DataTransferApp
 {
     public partial class DataTransferApp : Form
     {
-        private string DataAssetFileName = string.Empty;
-        private string ModelFolder = string.Empty;
+        private readonly string DataAssetFileName = "HS2 Asset Data.xlsx";
         private string DataFileLocation = string.Empty;
+
+        private string ModelFolder = string.Empty;
+
         public DataTransferApp()
         {
             this.InitializeComponent();
@@ -26,8 +28,6 @@ namespace DataTransferApp
 
             var model = new Model();
             this.ModelFolder = model.GetInfo().ModelPath;
-
-            this.DataAssetFileName = "HS2 Asset Data.xlsx";
 
             this.DataFileLocation = Path.Combine(this.ModelFolder, this.DataAssetFileName);
 
@@ -57,13 +57,29 @@ namespace DataTransferApp
                     this.FileLocationLabel.Text = this.DataFileLocation;
                     this.DataGridView.EnableHeadersVisualStyles = false;
                     this.DataGridView.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.LightGray;
-                    this.DataGridView.ColumnHeadersDefaultCellStyle.Font = new Font(this.DataGridView.ColumnHeadersDefaultCellStyle.Font, FontStyle.Bold); ;
+                    this.DataGridView.ColumnHeadersDefaultCellStyle.Font = new Font("Microsoft Sans Serif", 10, FontStyle.Regular);
+                    this.DataGridView.DefaultCellStyle.Font = new Font("Microsoft Sans Serif", 10, FontStyle.Regular);
+                    this.DataGridView.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.DarkCyan;
+                    this.DataGridView.ColumnHeadersDefaultCellStyle.SelectionBackColor = System.Drawing.Color.DarkCyan;
                 }
             }
         }
 
         private void UpdateFields_Click(object sender, System.EventArgs e)
         {
+
+            this.StatusLabel.Text = "Updating Fields ...";
+            this.StatusLabel.ForeColor = System.Drawing.Color.Red;
+
+            if (this.DataGridView.SelectedRows.Count == 0)
+            {
+                this.StatusLabel.Text = "Updating Representation ...";
+                this.ChangeRepresentation("Color by EquipName");
+                this.StatusLabel.Text = "Application Ready !!!";
+                this.StatusLabel.ForeColor = System.Drawing.Color.Black;
+                return;
+            }
+
             var mos = new ModelObjectSelector();
             var moe = mos.GetSelectedObjects();
 
@@ -87,11 +103,17 @@ namespace DataTransferApp
 
             }
 
+            this.StatusLabel.Text = "Updating Representation ...";
             this.ChangeRepresentation("Color by EquipName");
+            this.StatusLabel.Text = "Application Ready !!!";
+            this.StatusLabel.ForeColor = System.Drawing.Color.Black;
         }
 
         private void DeleteFields_Click(object sender, System.EventArgs e)
         {
+            this.StatusLabel.Text = "Updating Fields ...";
+            this.StatusLabel.ForeColor = System.Drawing.Color.Red;
+
             var mos = new ModelObjectSelector();
             var moe = mos.GetSelectedObjects();
 
@@ -113,7 +135,10 @@ namespace DataTransferApp
 
             }
 
+            this.StatusLabel.Text = "Updating Representation ...";
             this.ChangeRepresentation("Color by EquipName");
+            this.StatusLabel.Text = "Application Ready !!!";
+            this.StatusLabel.ForeColor = System.Drawing.Color.Black;
         }
 
         private void ChangeRepresentation(string representation)
