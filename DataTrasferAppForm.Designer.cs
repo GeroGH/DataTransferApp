@@ -47,9 +47,9 @@ namespace DataTransferApp
             // 
             this.DeleteFields.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.DeleteFields.ForeColor = System.Drawing.Color.Firebrick;
-            this.DeleteFields.Location = new System.Drawing.Point(431, 208);
+            this.DeleteFields.Location = new System.Drawing.Point(473, 141);
             this.DeleteFields.Name = "DeleteFields";
-            this.DeleteFields.Size = new System.Drawing.Size(410, 60);
+            this.DeleteFields.Size = new System.Drawing.Size(230, 65);
             this.DeleteFields.TabIndex = 7;
             this.DeleteFields.Text = "Clean Fields";
             this.DeleteFields.UseVisualStyleBackColor = true;
@@ -57,18 +57,18 @@ namespace DataTransferApp
             // 
             // DataGridView
             // 
-            this.DataGridView.Location = new System.Drawing.Point(15, 59);
+            this.DataGridView.Location = new System.Drawing.Point(15, 69);
             this.DataGridView.Name = "DataGridView";
-            this.DataGridView.Size = new System.Drawing.Size(827, 138);
+            this.DataGridView.Size = new System.Drawing.Size(452, 137);
             this.DataGridView.TabIndex = 6;
             // 
             // UpdateFields
             // 
             this.UpdateFields.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.UpdateFields.ForeColor = System.Drawing.SystemColors.MenuHighlight;
-            this.UpdateFields.Location = new System.Drawing.Point(14, 208);
+            this.UpdateFields.Location = new System.Drawing.Point(473, 69);
             this.UpdateFields.Name = "UpdateFields";
-            this.UpdateFields.Size = new System.Drawing.Size(410, 60);
+            this.UpdateFields.Size = new System.Drawing.Size(230, 65);
             this.UpdateFields.TabIndex = 5;
             this.UpdateFields.Text = "Update Fields";
             this.UpdateFields.UseVisualStyleBackColor = true;
@@ -76,12 +76,11 @@ namespace DataTransferApp
             // 
             // FileLocationLabel
             // 
-            this.FileLocationLabel.AutoSize = true;
             this.FileLocationLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FileLocationLabel.ForeColor = System.Drawing.Color.DarkCyan;
-            this.FileLocationLabel.Location = new System.Drawing.Point(6, 20);
+            this.FileLocationLabel.Location = new System.Drawing.Point(7, 16);
             this.FileLocationLabel.Name = "FileLocationLabel";
-            this.FileLocationLabel.Size = new System.Drawing.Size(107, 13);
+            this.FileLocationLabel.Size = new System.Drawing.Size(666, 30);
             this.FileLocationLabel.TabIndex = 10;
             this.FileLocationLabel.Text = "FileLocationLabel";
             this.FileLocationLabel.Click += new System.EventHandler(this.FileLocationLabel_Click);
@@ -100,9 +99,9 @@ namespace DataTransferApp
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.StatusLabel);
-            this.groupBox1.Location = new System.Drawing.Point(15, 274);
+            this.groupBox1.Location = new System.Drawing.Point(15, 212);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(827, 54);
+            this.groupBox1.Size = new System.Drawing.Size(688, 54);
             this.groupBox1.TabIndex = 12;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Application Status:";
@@ -112,7 +111,7 @@ namespace DataTransferApp
             this.groupBox2.Controls.Add(this.FileLocationLabel);
             this.groupBox2.Location = new System.Drawing.Point(15, 9);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(827, 44);
+            this.groupBox2.Size = new System.Drawing.Size(688, 54);
             this.groupBox2.TabIndex = 13;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Excel File Location:";
@@ -121,7 +120,7 @@ namespace DataTransferApp
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(852, 334);
+            this.ClientSize = new System.Drawing.Size(713, 272);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.DeleteFields);
@@ -138,7 +137,6 @@ namespace DataTransferApp
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
 
         }

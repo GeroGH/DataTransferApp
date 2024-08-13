@@ -24,7 +24,7 @@ namespace DataTransferApp
         private void DataTransferApp_Load(object sender, System.EventArgs e)
         {
             var currentFormLocation = this.Location;
-            this.Location = new Point(currentFormLocation.X - 475, currentFormLocation.Y - 250);
+            this.Location = new Point(currentFormLocation.X + 550, currentFormLocation.Y - 240);
 
             var model = new Model();
             this.ModelFolder = model.GetInfo().ModelPath;
