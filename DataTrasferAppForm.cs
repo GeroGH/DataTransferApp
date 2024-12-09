@@ -24,7 +24,7 @@ namespace DataTransferApp
         private void DataTransferApp_Load(object sender, System.EventArgs e)
         {
             var currentFormLocation = this.Location;
-            this.Location = new Point(currentFormLocation.X + 550, currentFormLocation.Y - 240);
+            this.Location = new Point(currentFormLocation.X + 660, currentFormLocation.Y - 150);
 
             var model = new Model();
             this.ModelFolder = model.GetInfo().ModelPath;
@@ -71,15 +71,6 @@ namespace DataTransferApp
             this.StatusLabel.Text = "Updating Fields ...";
             this.StatusLabel.ForeColor = System.Drawing.Color.Red;
 
-            if (this.DataGridView.SelectedRows.Count == 0)
-            {
-                this.StatusLabel.Text = "Updating Representation ...";
-                this.ChangeRepresentation("Color by EquipName");
-                this.StatusLabel.Text = "Application Ready !!!";
-                this.StatusLabel.ForeColor = System.Drawing.Color.Black;
-                return;
-            }
-
             var mos = new ModelObjectSelector();
             var moe = mos.GetSelectedObjects();
 
@@ -103,8 +94,6 @@ namespace DataTransferApp
 
             }
 
-            this.StatusLabel.Text = "Updating Representation ...";
-            this.ChangeRepresentation("Color by EquipName");
             this.StatusLabel.Text = "Application Ready !!!";
             this.StatusLabel.ForeColor = System.Drawing.Color.Black;
         }
@@ -133,14 +122,49 @@ namespace DataTransferApp
                     part.SetUserProperty(columnName, "");
                 }
 
+                part.SetUserProperty("HS2_AssetName", "");
+                part.SetUserProperty("HS2_AssetReference", "");
+
             }
 
-            this.StatusLabel.Text = "Updating Representation ...";
-            this.ChangeRepresentation("Color by EquipName");
             this.StatusLabel.Text = "Application Ready !!!";
             this.StatusLabel.ForeColor = System.Drawing.Color.Black;
         }
+        private void CombineFields_Click(object sender, System.EventArgs e)
+        {
+            this.StatusLabel.Text = "Combining Fields ...";
+            this.StatusLabel.ForeColor = System.Drawing.Color.Red;
 
+            var mos = new ModelObjectSelector();
+            var moe = mos.GetSelectedObjects();
+
+            while (moe.MoveNext())
+            {
+                var part = moe.Current as Part;
+                if (part == null)
+                {
+                    continue;
+                }
+
+                var HS2_EquipName = string.Empty;
+                part.GetReportProperty("HS2_EquipName", ref HS2_EquipName);
+
+                var HS2_EquipNumber = string.Empty;
+                part.GetReportProperty("HS2_EquipNumber", ref HS2_EquipNumber);
+
+                var HS2_PrAssetAbbr = string.Empty;
+                part.GetReportProperty("HS2_PrAssetAbbr", ref HS2_PrAssetAbbr);
+
+                var HS2_AssetAbbr = string.Empty;
+                part.GetReportProperty("HS2_AssetAbbr", ref HS2_AssetAbbr);
+
+                part.SetUserProperty("HS2_AssetName", HS2_EquipName + " " + HS2_EquipNumber);
+                part.SetUserProperty("HS2_AssetReference", HS2_PrAssetAbbr + "/" + HS2_AssetAbbr + "/" + HS2_EquipNumber);
+            }
+
+            this.StatusLabel.Text = "Application Ready !!!";
+            this.StatusLabel.ForeColor = System.Drawing.Color.Black;
+        }
         private void ChangeRepresentation(string representation)
         {
             var VisibleViews = ViewHandler.GetVisibleViews();
@@ -154,6 +178,30 @@ namespace DataTransferApp
         private void FileLocationLabel_Click(object sender, System.EventArgs e)
         {
             Process.Start(this.DataFileLocation);
+        }
+
+        private void ColorByEquipName_Click(object sender, System.EventArgs e)
+        {
+            this.StatusLabel.Text = "Updating Representation ...";
+            this.ChangeRepresentation("Color by EquipName");
+            this.StatusLabel.Text = "Application Ready !!!";
+            this.StatusLabel.ForeColor = System.Drawing.Color.Black;
+        }
+
+        private void ColorByEquipNumber_Click(object sender, System.EventArgs e)
+        {
+            this.StatusLabel.Text = "Updating Representation ...";
+            this.ChangeRepresentation("Color by EquipNumber");
+            this.StatusLabel.Text = "Application Ready !!!";
+            this.StatusLabel.ForeColor = System.Drawing.Color.Black;
+        }
+
+        private void ColorByEquipAssetRef_Click(object sender, System.EventArgs e)
+        {
+            this.StatusLabel.Text = "Updating Representation ...";
+            this.ChangeRepresentation("Color by EquipAssetRef");
+            this.StatusLabel.Text = "Application Ready !!!";
+            this.StatusLabel.ForeColor = System.Drawing.Color.Black;
         }
     }
 }
