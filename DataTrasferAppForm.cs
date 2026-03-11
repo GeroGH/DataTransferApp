@@ -1,207 +1,224 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using ExcelDataReader;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.UI;
-using ModelObjectSelector = Tekla.Structures.Model.UI.ModelObjectSelector;
+using Color = System.Drawing.Color;
 
 namespace DataTransferApp
 {
     public partial class DataTransferApp : Form
     {
-        private readonly string DataAssetFileName = "HS2 Asset Data.xlsx";
-        private string DataFileLocation = string.Empty;
-
-        private string ModelFolder = string.Empty;
+        private readonly string filePath = Properties.Settings.Default.DataFilePath;
 
         public DataTransferApp()
         {
             this.InitializeComponent();
         }
 
-        private void DataTransferApp_Load(object sender, System.EventArgs e)
+        private void DataTransferApp_Load(object sender, EventArgs e)
         {
-            var currentFormLocation = this.Location;
-            this.Location = new Point(currentFormLocation.X + 660, currentFormLocation.Y - 150);
+            this.MoveForm();
 
-            var model = new Model();
-            this.ModelFolder = model.GetInfo().ModelPath;
+            if (!File.Exists(this.filePath))
+                return;
 
-            this.DataFileLocation = Path.Combine(this.ModelFolder, this.DataAssetFileName);
+            this.LoadExcelFromFile(this.filePath);
+        }
 
-            using (var stream = File.Open(this.DataFileLocation, FileMode.Open, FileAccess.Read))
+        private void MoveForm()
+        {
+            var currentLocation = this.Location;
+            this.Location = new Point(currentLocation.X + 550, currentLocation.Y - 20);
+        }
+
+        private void LoadExcelFromFile(string path)
+        {
+            if (!File.Exists(path))
+                return;
+
+            using (var stream = File.Open(path, FileMode.Open, FileAccess.Read))
+            using (var reader = ExcelReaderFactory.CreateReader(stream))
             {
-                using (var reader = ExcelReaderFactory.CreateReader(stream))
+                var config = new ExcelDataSetConfiguration
                 {
-                    var conf = new ExcelDataSetConfiguration()
+                    ConfigureDataTable = delegate
                     {
-                        ConfigureDataTable = config => new ExcelDataTableConfiguration
+                        return new ExcelDataTableConfiguration
                         {
                             UseHeaderRow = true
-                        }
-                    };
+                        };
+                    }
+                };
 
-                    var dataSet = reader.AsDataSet(conf);
-                    var dataTableCollection = dataSet.Tables;
-                    var AssetClasses = dataTableCollection[0];
-                    this.DataGridView.DataSource = AssetClasses;
-                    this.DataGridView.RowHeadersVisible = false;
-                    this.DataGridView.AllowUserToResizeRows = false;
-                    this.DataGridView.ReadOnly = true;
-                    this.DataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-                    this.DataGridView.MultiSelect = false;
-                    this.DataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
-                    this.DataGridView.AllowUserToAddRows = false;
-                    this.FileLocationLabel.Text = this.DataFileLocation;
-                    this.DataGridView.EnableHeadersVisualStyles = false;
-                    this.DataGridView.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.LightGray;
-                    this.DataGridView.ColumnHeadersDefaultCellStyle.Font = new Font("Microsoft Sans Serif", 10, FontStyle.Regular);
-                    this.DataGridView.DefaultCellStyle.Font = new Font("Microsoft Sans Serif", 10, FontStyle.Regular);
-                    this.DataGridView.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.DarkCyan;
-                    this.DataGridView.ColumnHeadersDefaultCellStyle.SelectionBackColor = System.Drawing.Color.DarkCyan;
-                }
+                var dataSet = reader.AsDataSet(config);
+                var table = dataSet.Tables[0];
+
+                this.DataGridView.DataSource = table;
+
+                var emptyRow = table.NewRow();
+                table.Rows.Add(emptyRow);
+
+                this.ConfigureGrid();
+                this.ConfigureColumns();
+
+                this.FileLocationLabel.Text = path;
             }
         }
 
-        private void UpdateFields_Click(object sender, System.EventArgs e)
+        private void ConfigureGrid()
         {
+            this.DataGridView.RowHeadersVisible = false;
+            this.DataGridView.AllowUserToResizeRows = false;
+            this.DataGridView.ReadOnly = true;
+            this.DataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            this.DataGridView.MultiSelect = false;
+            this.DataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+            this.DataGridView.AllowUserToAddRows = false;
 
-            this.StatusLabel.Text = "Updating Fields ...";
-            this.StatusLabel.ForeColor = System.Drawing.Color.Red;
+            this.DataGridView.EnableHeadersVisualStyles = false;
 
-            var mos = new ModelObjectSelector();
-            var moe = mos.GetSelectedObjects();
+            this.DataGridView.ColumnHeadersDefaultCellStyle.BackColor = Color.LightGray;
+            this.DataGridView.ColumnHeadersDefaultCellStyle.Font = new Font("Microsoft Sans Serif", 10, FontStyle.Regular);
 
-            while (moe.MoveNext())
-            {
-                var part = moe.Current as Part;
-                if (part == null)
-                {
-                    continue;
-                }
-
-                var cells = this.DataGridView.CurrentRow.Cells;
-
-                foreach (DataGridViewCell cell in cells)
-                {
-                    var columnName = this.DataGridView.Columns[cell.ColumnIndex].Name;
-                    var value = cell.Value.ToString();
-
-                    part.SetUserProperty(columnName, value);
-                }
-
-            }
-
-            this.StatusLabel.Text = "Application Ready !!!";
-            this.StatusLabel.ForeColor = System.Drawing.Color.Black;
+            this.DataGridView.DefaultCellStyle.Font = new Font("Microsoft Sans Serif", 10, FontStyle.Regular);
+            this.DataGridView.DefaultCellStyle.SelectionBackColor = Color.DarkCyan;
+            this.DataGridView.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.DarkCyan;
         }
 
-        private void DeleteFields_Click(object sender, System.EventArgs e)
+        private void ConfigureColumns()
         {
-            this.StatusLabel.Text = "Updating Fields ...";
-            this.StatusLabel.ForeColor = System.Drawing.Color.Red;
+            if (this.DataGridView.Columns.Contains("IfcGUID"))
+                this.DataGridView.Columns.Remove("IfcGUID");
 
-            var mos = new ModelObjectSelector();
-            var moe = mos.GetSelectedObjects();
+            var dataTable = this.DataGridView.DataSource as DataTable;
 
-            while (moe.MoveNext())
-            {
-                var part = moe.Current as Part;
-                if (part == null)
-                {
-                    continue;
-                }
+            if (dataTable == null)
+                return;
 
-                var columns = this.DataGridView.Columns;
+            dataTable.DefaultView.Sort = "HS2_Filename, HS2_AssetClassDescr, HS2_AssetReference, HS2_Level";
 
-                foreach (DataGridViewColumn column in columns)
-                {
-                    var columnName = column.Name;
-                    part.SetUserProperty(columnName, "");
-                }
-
-                part.SetUserProperty("HS2_AssetName", "");
-                part.SetUserProperty("HS2_AssetReference", "");
-
-            }
-
-            this.StatusLabel.Text = "Application Ready !!!";
-            this.StatusLabel.ForeColor = System.Drawing.Color.Black;
+            this.DataGridView.Columns["HS2_Filename"].DisplayIndex = 0;
+            this.DataGridView.Columns["HS2_AssetClassDescr"].DisplayIndex = 1;
+            this.DataGridView.Columns["HS2_AssetReference"].DisplayIndex = 2;
+            this.DataGridView.Columns["HS2_Level"].DisplayIndex = 3;
         }
-        private void CombineFields_Click(object sender, System.EventArgs e)
+
+        private void UpdateFields_Click(object sender, EventArgs e)
         {
-            this.StatusLabel.Text = "Combining Fields ...";
-            this.StatusLabel.ForeColor = System.Drawing.Color.Red;
+            this.SetStatus("Updating Fields ...", Color.Red);
 
-            var mos = new ModelObjectSelector();
-            var moe = mos.GetSelectedObjects();
+            var selector = new Tekla.Structures.Model.UI.ModelObjectSelector();
+            var objects = selector.GetSelectedObjects();
 
-            while (moe.MoveNext())
+            while (objects.MoveNext())
             {
-                var part = moe.Current as Part;
+                var part = objects.Current as Part;
+
                 if (part == null)
-                {
                     continue;
-                }
 
-                var HS2_EquipName = string.Empty;
-                part.GetReportProperty("HS2_EquipName", ref HS2_EquipName);
-
-                var HS2_EquipNumber = string.Empty;
-                part.GetReportProperty("HS2_EquipNumber", ref HS2_EquipNumber);
-
-                var HS2_PrAssetAbbr = string.Empty;
-                part.GetReportProperty("HS2_PrAssetAbbr", ref HS2_PrAssetAbbr);
-
-                var HS2_AssetAbbr = string.Empty;
-                part.GetReportProperty("HS2_AssetAbbr", ref HS2_AssetAbbr);
-
-                part.SetUserProperty("HS2_AssetName", HS2_EquipName + " " + HS2_EquipNumber);
-                part.SetUserProperty("HS2_AssetReference", HS2_PrAssetAbbr + "/" + HS2_AssetAbbr + "/" + HS2_EquipNumber);
+                this.UpdatePartProperties(part);
             }
 
-            this.StatusLabel.Text = "Application Ready !!!";
-            this.StatusLabel.ForeColor = System.Drawing.Color.Black;
+            this.ChangeRepresentation();
+
+            this.SetStatus("Application Ready !!!", Color.Black);
         }
+
+        private void UpdatePartProperties(Part part)
+        {
+            if (this.DataGridView.CurrentRow == null)
+                return;
+
+            var cells = this.DataGridView.CurrentRow.Cells;
+
+            foreach (DataGridViewCell cell in cells)
+            {
+                var columnName = this.DataGridView.Columns[cell.ColumnIndex].Name;
+
+                var value = cell.Value != null ? cell.Value.ToString() : "";
+
+                part.SetUserProperty(columnName, value);
+            }
+        }
+
+        private void ChangeRepresentation()
+        {
+            var views = ViewHandler.GetVisibleViews();
+
+            while (views.MoveNext())
+            {
+                var view = views.Current;
+                view.Modify();
+            }
+        }
+
         private void ChangeRepresentation(string representation)
         {
-            var VisibleViews = ViewHandler.GetVisibleViews();
-            while (VisibleViews.MoveNext())
+            var views = ViewHandler.GetVisibleViews();
+
+            while (views.MoveNext())
             {
-                var CurrentView = VisibleViews.Current;
-                CurrentView.CurrentRepresentation = representation;
-                CurrentView.Modify();
+                var view = views.Current;
+                view.CurrentRepresentation = representation;
+                view.Modify();
             }
         }
-        private void FileLocationLabel_Click(object sender, System.EventArgs e)
+
+        private void SetStatus(string text, Color color)
         {
-            Process.Start(this.DataFileLocation);
+            this.StatusLabel.Text = text;
+            this.StatusLabel.ForeColor = color;
         }
 
-        private void ColorByEquipName_Click(object sender, System.EventArgs e)
+        private void FileLocationLabel_Click(object sender, EventArgs e)
         {
-            this.StatusLabel.Text = "Updating Representation ...";
-            this.ChangeRepresentation("Color by EquipName");
-            this.StatusLabel.Text = "Application Ready !!!";
-            this.StatusLabel.ForeColor = System.Drawing.Color.Black;
+            if (File.Exists(this.filePath))
+                Process.Start(this.filePath);
         }
 
-        private void ColorByEquipNumber_Click(object sender, System.EventArgs e)
+        private void ApplyRepresentation(string representation)
         {
-            this.StatusLabel.Text = "Updating Representation ...";
-            this.ChangeRepresentation("Color by EquipNumber");
-            this.StatusLabel.Text = "Application Ready !!!";
-            this.StatusLabel.ForeColor = System.Drawing.Color.Black;
+            this.SetStatus("Updating Representation ...", Color.Red);
+
+            this.ChangeRepresentation(representation);
+
+            this.SetStatus("Application Ready !!!", Color.Black);
         }
 
-        private void ColorByEquipAssetRef_Click(object sender, System.EventArgs e)
+        private void ColorByEquipName_Click(object sender, EventArgs e)
         {
-            this.StatusLabel.Text = "Updating Representation ...";
-            this.ChangeRepresentation("Color by EquipAssetRef");
-            this.StatusLabel.Text = "Application Ready !!!";
-            this.StatusLabel.ForeColor = System.Drawing.Color.Black;
+            this.ApplyRepresentation("Color by EquipName");
+        }
+
+        private void ColorByEquipAssetRef_Click(object sender, EventArgs e)
+        {
+            this.ApplyRepresentation("Color by EquipAssetRef");
+        }
+
+        private void FileLocationLabel_DragEnter(object sender, DragEventArgs e)
+        {
+            var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+            var newFile = files.FirstOrDefault();
+
+            if (string.IsNullOrEmpty(newFile) || !File.Exists(newFile))
+                return;
+
+            this.FileLocationLabel.Text = newFile;
+
+            Properties.Settings.Default.DataFilePath = newFile;
+            Properties.Settings.Default.Save();
+
+            this.LoadExcelFromFile(newFile);
+
+            this.SetStatus("New file loaded successfully!", Color.Black);
         }
     }
 }
