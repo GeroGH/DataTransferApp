@@ -33,8 +33,9 @@ namespace DataTransferApp
 
         private void MoveForm()
         {
-            var currentLocation = this.Location;
-            this.Location = new Point(currentLocation.X + 550, currentLocation.Y - 20);
+            var currentScreen = Screen.FromPoint(Cursor.Position);
+            var workingArea = currentScreen.WorkingArea;
+            this.Location = new Point(workingArea.Right - this.Width - 50, workingArea.Top + 150);
         }
 
         private void LoadExcelFromFile(string path)
@@ -108,27 +109,44 @@ namespace DataTransferApp
             this.DataGridView.Columns["HS2_AssetReference"].DisplayIndex = 2;
             this.DataGridView.Columns["HS2_Level"].DisplayIndex = 3;
         }
-
         private void UpdateFields_Click(object sender, EventArgs e)
         {
-            this.SetStatus("Updating Fields ...", Color.Red);
+            this.LockControls(true);
+            this.Cursor = Cursors.WaitCursor;
 
-            var selector = new Tekla.Structures.Model.UI.ModelObjectSelector();
-            var objects = selector.GetSelectedObjects();
-
-            while (objects.MoveNext())
+            try
             {
-                var part = objects.Current as Part;
+                this.SetStatus("Updating Fields ...", Color.Red);
 
-                if (part == null)
-                    continue;
+                var selector = new Tekla.Structures.Model.UI.ModelObjectSelector();
+                var objects = selector.GetSelectedObjects();
 
-                this.UpdatePartProperties(part);
+                while (objects.MoveNext())
+                {
+                    var part = objects.Current as Part;
+                    if (part == null) continue;
+
+                    this.UpdatePartProperties(part);
+                }
+
+                this.ChangeRepresentation();
+
+                this.SetStatus("Application Ready !!!", Color.Black);
             }
+            finally
+            {
+                this.Cursor = Cursors.Default;
+                this.LockControls(false);
+            }
+        }
 
-            this.ChangeRepresentation();
-
-            this.SetStatus("Application Ready !!!", Color.Black);
+        private void LockControls(bool locked)
+        {
+            this.DataGridView.Enabled = !locked;
+            this.ImportExcelData.Enabled = !locked;
+            this.ColorByEquipName.Enabled = !locked;
+            this.ColorByEquipAssetRef.Enabled = !locked;
+            this.FileLocationLabel.Enabled = !locked;
         }
 
         private void UpdatePartProperties(Part part)
